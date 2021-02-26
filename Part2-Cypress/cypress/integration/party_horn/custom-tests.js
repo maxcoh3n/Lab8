@@ -14,7 +14,7 @@ describe('Party Horn Tests', () => {
     });
   });
 
-  it('Volume input changes when slider is changed', () => {
+  it('Volume input changes when slider changes', () => {
     cy.get('#volume-slider')
       .invoke('val', 33)
       .trigger('input');
@@ -23,13 +23,23 @@ describe('Party Horn Tests', () => {
     });
   });
 
-  it('Volume of the <audio> element changed when the slider changed', () => {
+  it('Volume of audio element changes when slider changes', () => {
     cy.get('#volume-slider')
       .invoke('val', 33)
       .trigger('input');
     cy.get('#horn-sound').then($el => {
       expect($el).to.have.prop('volume', 0.33);
     });
+  });
+
+  it('Image and sound sources change when you select party horn radio button', ()=>{
+    cy.get('#radio-party-horn').click();
+    cy.get('#sound-image').then($el =>{
+        expect($el).to.have.attr('src', './assets/media/images/party-horn.svg')
+    });
+    cy.get('#horn-sound').then($el =>{
+      expect($el).to.have.attr('src', './assets/media/audio/party-horn.mp3')
+  });
   });
 
   it('Volume image goes from max to 2 bars when the volume level goes from 67 to 66', () => {
@@ -77,32 +87,26 @@ describe('Party Horn Tests', () => {
     });
   });
 
-  it('Except honk button to be disabled now that volume is mute', () => {
-    cy.get('#volume-slider')
-      .invoke('val', 0)
-      .trigger('input');
+  it('Honk button is disabled when textbox input is empty ', ()=>{
+    cy.get('#volume-number').clear();
     cy.get('#honk-btn').then($el => {
-      expect($el).to.have.attr('disabled');
+      expect($el).to.have.attr('disabled', 'disabled');
     });
   });
 
-  it('Image & Sound changes when radio buttons are swapped', () => {
-    cy.get('#radio-car-horn').click();
-    cy.get('#sound-image').then($el => {
-      expect($el).to.have.attr('src', './assets/media/images/car.svg');
-    });
-    cy.get('#horn-sound').then($el => {
-      expect($el).to.have.attr('src', './assets/media/audio/car-horn.mp3');
+  it('Honk button is disabled when textbox input is non-number', ()=>{
+    cy.get('#volume-number').clear().type('hello world');
+    cy.get('#honk-btn').then($el => {
+      expect($el).to.have.attr('disabled', 'disabled');
     });
   });
 
-  it('Horn honk is played when the honk button is clicked', () => {
-    cy.get('#volume-slider')
-      .invoke('val', 30)
-      .trigger('input');
-    cy.get('#honk-btn').click();
-    cy.get('#horn-sound').then($el => {
-      expect($el).to.have.prop('paused', false);
+  it('Error is shown when you type a number outside of the given range for the volume textbox input', ()=>{
+    cy.get('#volume-number').clear().type('110');
+    cy.get('#volume-number:invalid').then($el => {
+      expect($el).to.have.attr('max', '100');
     });
   });
+
+
 });
